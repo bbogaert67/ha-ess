@@ -4,8 +4,8 @@
   "codeowners": ["@homeassistant"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/homeassistant/energy_flow_manager",
+  "documentation": "https://github.com/bbogaert67/ha-ess",
   "iot_class": "calculated",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.2"
 }
