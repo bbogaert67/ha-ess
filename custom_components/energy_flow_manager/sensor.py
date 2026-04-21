@@ -206,8 +206,8 @@ class EnergyFlowStatusSensor(CoordinatorEntity, SensorEntity):
         """Return the state of the sensor."""
         if self.coordinator.data:
             is_active = self.coordinator.data.get(self._data_key, False)
-            return "Active" if is_active else "Inactive"
-        return "Unknown"
+            return "on" if is_active else "off"
+        return "unknown"
 
     @property
     def icon(self) -> str:
