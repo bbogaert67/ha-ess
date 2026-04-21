@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 from datetime import timedelta
 
-from homeassistant.components import frontend
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -59,9 +58,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register update listener for config changes
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-    # Register panel in sidebar
-    await async_register_panel(hass)
-
     return True
 
 
@@ -82,21 +78,6 @@ async def async_setup_services(hass: HomeAssistant, manager: EnergyFlowManager) 
         _LOGGER.info("Force update triggered")
 
     hass.services.async_register(DOMAIN, "force_update", handle_force_update)
-
-
-async def async_register_panel(hass: HomeAssistant) -> None:
-    """Register the Energy Flow Manager panel."""
-    if DOMAIN not in hass.data.get("frontend_panels", {}):
-        # Register the panel using the frontend component
-        await frontend.async_register_built_in_panel(
-            hass,
-            "iframe",
-            "Energy Flow",
-            "mdi:solar-power",
-            DOMAIN,
-            {"url": f"/local/community/{DOMAIN}/panel.html"},
-            require_admin=False,
-        )
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
