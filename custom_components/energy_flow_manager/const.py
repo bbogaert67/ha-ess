@@ -11,12 +11,14 @@ CONF_WATER_HEATER_SWITCH = "water_heater_switch"
 CONF_CAR_CHARGER_SWITCH = "car_charger_switch"
 
 # Water heater configuration
+CONF_WATER_HEATER_ENABLED = "water_heater_enabled"
 CONF_WATER_HEATER_MIN_SURPLUS = "water_heater_min_surplus"
 CONF_WATER_HEATER_MIN_TEMP = "water_heater_min_temp"
 CONF_WATER_HEATER_MAX_TEMP = "water_heater_max_temp"
 CONF_WATER_HEATER_POWER = "water_heater_power"
 
 # Car charger configuration
+CONF_CAR_CHARGER_ENABLED = "car_charger_enabled"
 CONF_CAR_CHARGER_MIN_SURPLUS = "car_charger_min_surplus"
 CONF_CAR_CHARGER_MIN_RATE = "car_charger_min_rate"
 CONF_CAR_CHARGER_MAX_RATE = "car_charger_max_rate"

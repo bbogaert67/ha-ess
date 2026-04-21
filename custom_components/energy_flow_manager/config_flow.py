@@ -17,7 +17,9 @@ from .const import (
     CONF_BATTERY_POWER_SENSOR,
     CONF_WATER_TEMP_SENSOR,
     CONF_WATER_HEATER_SWITCH,
+    CONF_WATER_HEATER_ENABLED,
     CONF_CAR_CHARGER_SWITCH,
+    CONF_CAR_CHARGER_ENABLED,
     CONF_WATER_HEATER_MIN_SURPLUS,
     CONF_WATER_HEATER_MIN_TEMP,
     CONF_WATER_HEATER_MAX_TEMP,
@@ -83,6 +85,10 @@ class EnergyFlowManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     selector.EntitySelectorConfig(domain="switch")
                 ),
                 vol.Optional(
+                    CONF_WATER_HEATER_ENABLED,
+                    default=True,
+                ): selector.BooleanSelector(),
+                vol.Optional(
                     CONF_WATER_HEATER_MIN_SURPLUS,
                     default=DEFAULT_WATER_HEATER_MIN_SURPLUS,
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
@@ -105,6 +111,10 @@ class EnergyFlowManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CAR_CHARGER_RATE_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="number")
                 ),
+                vol.Optional(
+                    CONF_CAR_CHARGER_ENABLED,
+                    default=True,
+                ): selector.BooleanSelector(),
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_SURPLUS,
                     default=DEFAULT_CAR_CHARGER_MIN_SURPLUS,
@@ -205,6 +215,10 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
                     selector.EntitySelectorConfig(domain="switch")
                 ),
                 vol.Optional(
+                    CONF_WATER_HEATER_ENABLED,
+                    default=current_data.get(CONF_WATER_HEATER_ENABLED, True),
+                ): selector.BooleanSelector(),
+                vol.Optional(
                     CONF_WATER_HEATER_MIN_SURPLUS,
                     default=current_data.get(CONF_WATER_HEATER_MIN_SURPLUS, DEFAULT_WATER_HEATER_MIN_SURPLUS),
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
@@ -233,6 +247,10 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="number")
                 ),
+                vol.Optional(
+                    CONF_CAR_CHARGER_ENABLED,
+                    default=current_data.get(CONF_CAR_CHARGER_ENABLED, True),
+                ): selector.BooleanSelector(),
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_SURPLUS,
                     default=current_data.get(CONF_CAR_CHARGER_MIN_SURPLUS, DEFAULT_CAR_CHARGER_MIN_SURPLUS),

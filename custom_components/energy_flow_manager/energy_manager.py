@@ -15,7 +15,9 @@ from .const import (
     CONF_BATTERY_POWER_SENSOR,
     CONF_WATER_TEMP_SENSOR,
     CONF_WATER_HEATER_SWITCH,
+    CONF_WATER_HEATER_ENABLED,
     CONF_CAR_CHARGER_SWITCH,
+    CONF_CAR_CHARGER_ENABLED,
     CONF_WATER_HEATER_MIN_SURPLUS,
     CONF_WATER_HEATER_MIN_TEMP,
     CONF_WATER_HEATER_MAX_TEMP,
@@ -107,14 +109,16 @@ class EnergyFlowManager:
         return self._data
 
     async def _control_water_heater(
-        self, 
-        solar_surplus: float | None, 
+        self,
+        solar_surplus: float | None,
         battery_soc: float | None,
         water_temp: float | None
     ) -> None:
         """Control water heater based on surplus energy and temperature."""
         water_heater_switch = self.config.get(CONF_WATER_HEATER_SWITCH)
-        if not water_heater_switch:
+        water_heater_enabled = self.config.get(CONF_WATER_HEATER_ENABLED, True)
+        
+        if not water_heater_switch or not water_heater_enabled:
             return
 
         # Get configuration
@@ -159,13 +163,15 @@ class EnergyFlowManager:
         self._data["water_heater_active"] = should_heat
 
     async def _control_car_charger(
-        self, 
-        solar_surplus: float | None, 
+        self,
+        solar_surplus: float | None,
         battery_soc: float | None
     ) -> None:
         """Control car charger based on surplus energy."""
         car_charger_switch = self.config.get(CONF_CAR_CHARGER_SWITCH)
-        if not car_charger_switch:
+        car_charger_enabled = self.config.get(CONF_CAR_CHARGER_ENABLED, True)
+        
+        if not car_charger_switch or not car_charger_enabled:
             return
 
         # Get configuration
