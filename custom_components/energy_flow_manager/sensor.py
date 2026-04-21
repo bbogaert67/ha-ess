@@ -227,7 +227,7 @@ class EnergyFlowStatusSensor(CoordinatorEntity, SensorEntity):
             return {}
         
         attrs = {
-            "last_update": self.coordinator.last_update_success_time,
+            "last_update": self.coordinator.last_update_success,
         }
         
         # Add specific attributes based on sensor type
