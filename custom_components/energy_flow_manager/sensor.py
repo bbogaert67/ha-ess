@@ -226,16 +226,8 @@ class EnergyFlowStatusSensor(CoordinatorEntity, SensorEntity):
         if not self.coordinator.data:
             return {}
         
-        attrs = {
+        return {
             "last_update": self.coordinator.last_update_success,
         }
-        
-        # Add specific attributes based on sensor type
-        if "water" in self._data_key.lower():
-            attrs["water_temperature"] = self.coordinator.data.get(ATTR_WATER_TEMP)
-        elif "car" in self._data_key.lower():
-            attrs["charge_rate"] = self.coordinator.data.get(ATTR_CAR_CHARGER_RATE)
-        
-        return attrs
 
 # Made with Bob
