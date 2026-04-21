@@ -168,7 +168,7 @@ class EnergyFlowSensor(CoordinatorEntity, SensorEntity):
             return {}
         
         return {
-            "last_update": self.coordinator.last_update_success_time,
+            "last_update": self.coordinator.last_update_success,
         }
 
 
