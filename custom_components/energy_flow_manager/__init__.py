@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.components import panel_custom
 
 from .const import (
     DOMAIN,
@@ -93,8 +94,9 @@ async def async_register_panel(hass: HomeAssistant) -> None:
     with open(panel_path, "r", encoding="utf-8") as file:
         panel_html = file.read()
     
-    # Register the panel using panel_custom
-    await hass.components.panel_custom.async_register_panel(
+    # Register the panel using panel_custom component
+    await panel_custom.async_register_panel(
+        hass,
         frontend_url_path=DOMAIN,
         webcomponent_name="energy-flow-panel",
         sidebar_title="Energy Flow",
