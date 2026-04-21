@@ -10,7 +10,6 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.components import panel_custom
-from homeassistant.util import file as file_util
 
 from .const import (
     DOMAIN,
@@ -86,15 +85,19 @@ async def async_setup_services(hass: HomeAssistant, manager: EnergyFlowManager) 
     hass.services.async_register(DOMAIN, "force_update", handle_force_update)
 
 
+def _read_file(file_path: str) -> str:
+    """Read file content synchronously (to be called in executor)."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+
 async def async_register_panel(hass: HomeAssistant) -> None:
     """Register the Energy Flow Manager panel."""
     # Get the path to the panel HTML file
     panel_path = os.path.join(os.path.dirname(__file__), "panel.html")
     
-    # Read the panel HTML content asynchronously
-    panel_html = await hass.async_add_executor_job(
-        file_util.read_file, panel_path
-    )
+    # Read the panel HTML content asynchronously using executor
+    panel_html = await hass.async_add_executor_job(_read_file, panel_path)
     
     # Register the panel using panel_custom component
     await panel_custom.async_register_panel(
