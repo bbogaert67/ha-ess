@@ -167,7 +167,7 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -176,12 +176,12 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             # Update the config entry with new data
             self.hass.config_entries.async_update_entry(
-                self.config_entry, data={**self.config_entry.data, **user_input}
+                self._config_entry, data={**self._config_entry.data, **user_input}
             )
             return self.async_create_entry(title="", data={})
 
         # Get current values
-        current_data = self.config_entry.data
+        current_data = self._config_entry.data
 
         # Schema for all options including entity selections
         data_schema = vol.Schema(
