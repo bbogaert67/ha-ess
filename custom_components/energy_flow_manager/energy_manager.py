@@ -231,7 +231,7 @@ class EnergyFlowManager:
             await self._set_charge_rate(rate_entity, charge_rate)
 
         self._data["car_charger_status"] = should_charge
-        self._data["car_charger_rate"] = charge_rate if should_charge else 0
+        self._data["car_charger_rate"] = charge_rate
 
     async def _set_charge_rate(self, rate_entity: str, rate: float) -> None:
         """Set the car charger rate."""
