@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import logging
-import os
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.components import panel_custom
 
 from .const import (
     DOMAIN,
@@ -60,9 +58,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register update listener for config changes
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-    # Register panel in sidebar
-    await async_register_panel(hass)
-
     return True
 
 
@@ -83,34 +78,6 @@ async def async_setup_services(hass: HomeAssistant, manager: EnergyFlowManager) 
         _LOGGER.info("Force update triggered")
 
     hass.services.async_register(DOMAIN, "force_update", handle_force_update)
-
-
-def _read_file(file_path: str) -> str:
-    """Read file content synchronously (to be called in executor)."""
-    with open(file_path, "r", encoding="utf-8") as file:
-        return file.read()
-
-
-async def async_register_panel(hass: HomeAssistant) -> None:
-    """Register the Energy Flow Manager panel."""
-    # Get the path to the panel HTML file
-    panel_path = os.path.join(os.path.dirname(__file__), "panel.html")
-    
-    # Read the panel HTML content asynchronously using executor
-    panel_html = await hass.async_add_executor_job(_read_file, panel_path)
-    
-    # Register the panel using panel_custom component
-    await panel_custom.async_register_panel(
-        hass,
-        frontend_url_path=DOMAIN,
-        webcomponent_name="energy-flow-panel",
-        sidebar_title="Energy Flow",
-        sidebar_icon="mdi:solar-power",
-        module_url="/api/panel_custom/energy-flow-panel",
-        embed_iframe=True,
-        require_admin=False,
-        config={"html": panel_html},
-    )
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
