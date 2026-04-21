@@ -38,15 +38,24 @@
     "step": {
       "init": {
         "title": "Energy Flow Manager Options",
-        "description": "Update configuration settings.",
+        "description": "Update all configuration settings including entities and parameters.",
         "data": {
+          "solar_surplus_sensor": "Solar Surplus Power Sensor",
+          "battery_soc_sensor": "Battery State of Charge Sensor",
+          "battery_power_sensor": "Battery Power Sensor",
+          "water_temp_sensor": "Water Temperature Sensor",
+          "water_heater_switch": "Water Heater Switch Entity",
           "water_heater_min_surplus": "Water Heater: Minimum Surplus (W)",
           "water_heater_min_temp": "Water Heater: Minimum Temperature (°C)",
           "water_heater_max_temp": "Water Heater: Maximum Temperature (°C)",
+          "water_heater_power": "Water Heater: Power Consumption (W)",
+          "car_charger_switch": "Car Charger Switch Entity",
+          "car_charger_rate_entity": "Car Charger Rate Control Entity",
           "car_charger_min_surplus": "Car Charger: Minimum Surplus (W)",
           "car_charger_min_rate": "Car Charger: Minimum Rate (A)",
           "car_charger_max_rate": "Car Charger: Maximum Rate (A)",
           "battery_min_soc": "Battery: Minimum SOC (%)",
+          "battery_max_soc": "Battery: Maximum SOC (%)",
           "update_interval": "Update Interval (seconds)"
         }
       }

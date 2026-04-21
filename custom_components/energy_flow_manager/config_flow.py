@@ -169,9 +169,41 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
         # Get current values
         current_data = self.config_entry.data
 
-        # Schema for all options
+        # Schema for all options including entity selections
         data_schema = vol.Schema(
             {
+                # Input sensors
+                vol.Optional(
+                    CONF_SOLAR_SURPLUS_SENSOR,
+                    default=current_data.get(CONF_SOLAR_SURPLUS_SENSOR),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                vol.Optional(
+                    CONF_BATTERY_SOC_SENSOR,
+                    default=current_data.get(CONF_BATTERY_SOC_SENSOR),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                vol.Optional(
+                    CONF_BATTERY_POWER_SENSOR,
+                    default=current_data.get(CONF_BATTERY_POWER_SENSOR),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                vol.Optional(
+                    CONF_WATER_TEMP_SENSOR,
+                    default=current_data.get(CONF_WATER_TEMP_SENSOR),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                # Water heater
+                vol.Optional(
+                    CONF_WATER_HEATER_SWITCH,
+                    default=current_data.get(CONF_WATER_HEATER_SWITCH),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="switch")
+                ),
                 vol.Optional(
                     CONF_WATER_HEATER_MIN_SURPLUS,
                     default=current_data.get(CONF_WATER_HEATER_MIN_SURPLUS, DEFAULT_WATER_HEATER_MIN_SURPLUS),
@@ -185,6 +217,23 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
                     default=current_data.get(CONF_WATER_HEATER_MAX_TEMP, DEFAULT_WATER_HEATER_MAX_TEMP),
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
+                    CONF_WATER_HEATER_POWER,
+                    default=current_data.get(CONF_WATER_HEATER_POWER, DEFAULT_WATER_HEATER_POWER),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
+                # Car charger
+                vol.Optional(
+                    CONF_CAR_CHARGER_SWITCH,
+                    default=current_data.get(CONF_CAR_CHARGER_SWITCH),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="switch")
+                ),
+                vol.Optional(
+                    CONF_CAR_CHARGER_RATE_ENTITY,
+                    default=current_data.get(CONF_CAR_CHARGER_RATE_ENTITY),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="number")
+                ),
+                vol.Optional(
                     CONF_CAR_CHARGER_MIN_SURPLUS,
                     default=current_data.get(CONF_CAR_CHARGER_MIN_SURPLUS, DEFAULT_CAR_CHARGER_MIN_SURPLUS),
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
@@ -196,9 +245,14 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
                     CONF_CAR_CHARGER_MAX_RATE,
                     default=current_data.get(CONF_CAR_CHARGER_MAX_RATE, DEFAULT_CAR_CHARGER_MAX_RATE),
                 ): vol.All(vol.Coerce(int), vol.Range(min=6, max=32)),
+                # Battery and general
                 vol.Optional(
                     CONF_BATTERY_MIN_SOC,
                     default=current_data.get(CONF_BATTERY_MIN_SOC, DEFAULT_BATTERY_MIN_SOC),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+                vol.Optional(
+                    CONF_BATTERY_MAX_SOC,
+                    default=current_data.get(CONF_BATTERY_MAX_SOC, DEFAULT_BATTERY_MAX_SOC),
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_UPDATE_INTERVAL,
