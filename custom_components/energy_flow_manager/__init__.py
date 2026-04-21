@@ -87,8 +87,9 @@ async def async_setup_services(hass: HomeAssistant, manager: EnergyFlowManager) 
 async def async_register_panel(hass: HomeAssistant) -> None:
     """Register the Energy Flow Manager panel."""
     if DOMAIN not in hass.data.get("frontend_panels", {}):
-        # Register the panel
-        hass.components.frontend.async_register_built_in_panel(
+        # Register the panel using the frontend component
+        await frontend.async_register_built_in_panel(
+            hass,
             "iframe",
             "Energy Flow",
             "mdi:solar-power",
