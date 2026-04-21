@@ -25,6 +25,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .const import (
     DOMAIN,
+    VERSION,
     ATTR_SOLAR_SURPLUS,
     ATTR_BATTERY_SOC,
     ATTR_BATTERY_POWER,
@@ -151,7 +152,7 @@ class EnergyFlowSensor(CoordinatorEntity, SensorEntity):
             "name": "Energy Flow Manager",
             "manufacturer": "Custom",
             "model": "Energy Flow Manager",
-            "sw_version": "1.0.0",
+            "sw_version": VERSION,
         }
 
     @property
@@ -198,7 +199,7 @@ class EnergyFlowStatusSensor(CoordinatorEntity, SensorEntity):
             "name": "Energy Flow Manager",
             "manufacturer": "Custom",
             "model": "Energy Flow Manager",
-            "sw_version": "1.0.0",
+            "sw_version": VERSION,
         }
 
     @property
