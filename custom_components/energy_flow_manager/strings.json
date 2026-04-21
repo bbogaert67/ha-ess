@@ -2,43 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Energy Flow Manager - Input Sensors",
-        "description": "Configure the input sensors for monitoring energy flows.",
+        "title": "Energy Flow Manager Configuration",
+        "description": "Configure all settings for the Energy Flow Manager integration.",
         "data": {
           "solar_surplus_sensor": "Solar Surplus Power Sensor (required)",
           "battery_soc_sensor": "Battery State of Charge Sensor (optional)",
           "battery_power_sensor": "Battery Power Sensor (optional)",
-          "water_temp_sensor": "Water Temperature Sensor (optional)"
-        }
-      },
-      "water_heater": {
-        "title": "Water Heater Configuration",
-        "description": "Configure water heater control settings.",
-        "data": {
+          "water_temp_sensor": "Water Temperature Sensor (optional)",
           "water_heater_switch": "Water Heater Switch Entity (optional)",
-          "water_heater_min_surplus": "Minimum Surplus to Start Heating (W)",
-          "water_heater_min_temp": "Minimum Water Temperature (°C)",
-          "water_heater_max_temp": "Maximum Water Temperature (°C)",
-          "water_heater_power": "Water Heater Power Consumption (W)"
-        }
-      },
-      "car_charger": {
-        "title": "Car Charger Configuration",
-        "description": "Configure car charger control settings.",
-        "data": {
+          "water_heater_min_surplus": "Water Heater: Minimum Surplus (W)",
+          "water_heater_min_temp": "Water Heater: Minimum Temperature (°C)",
+          "water_heater_max_temp": "Water Heater: Maximum Temperature (°C)",
+          "water_heater_power": "Water Heater: Power Consumption (W)",
           "car_charger_switch": "Car Charger Switch Entity (optional)",
           "car_charger_rate_entity": "Car Charger Rate Control Entity (optional)",
-          "car_charger_min_surplus": "Minimum Surplus to Start Charging (W)",
-          "car_charger_min_rate": "Minimum Charge Rate (A)",
-          "car_charger_max_rate": "Maximum Charge Rate (A)"
-        }
-      },
-      "battery": {
-        "title": "Battery & General Settings",
-        "description": "Configure battery protection and update settings.",
-        "data": {
-          "battery_min_soc": "Minimum Battery SOC for Device Control (%)",
-          "battery_max_soc": "Maximum Battery SOC (%)",
+          "car_charger_min_surplus": "Car Charger: Minimum Surplus (W)",
+          "car_charger_min_rate": "Car Charger: Minimum Rate (A)",
+          "car_charger_max_rate": "Car Charger: Maximum Rate (A)",
+          "battery_min_soc": "Battery: Minimum SOC (%)",
+          "battery_max_soc": "Battery: Maximum SOC (%)",
           "update_interval": "Update Interval (seconds)"
         }
       }
@@ -58,13 +40,13 @@
         "title": "Energy Flow Manager Options",
         "description": "Update configuration settings.",
         "data": {
-          "water_heater_min_surplus": "Minimum Surplus to Start Heating (W)",
-          "water_heater_min_temp": "Minimum Water Temperature (°C)",
-          "water_heater_max_temp": "Maximum Water Temperature (°C)",
-          "car_charger_min_surplus": "Minimum Surplus to Start Charging (W)",
-          "car_charger_min_rate": "Minimum Charge Rate (A)",
-          "car_charger_max_rate": "Maximum Charge Rate (A)",
-          "battery_min_soc": "Minimum Battery SOC for Device Control (%)",
+          "water_heater_min_surplus": "Water Heater: Minimum Surplus (W)",
+          "water_heater_min_temp": "Water Heater: Minimum Temperature (°C)",
+          "water_heater_max_temp": "Water Heater: Maximum Temperature (°C)",
+          "car_charger_min_surplus": "Car Charger: Minimum Surplus (W)",
+          "car_charger_min_rate": "Car Charger: Minimum Rate (A)",
+          "car_charger_max_rate": "Car Charger: Maximum Rate (A)",
+          "battery_min_soc": "Battery: Minimum SOC (%)",
           "update_interval": "Update Interval (seconds)"
         }
       }

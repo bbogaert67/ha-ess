@@ -9,7 +9,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
-from homeassistant.helpers import config_validation as cv
 
 from .const import (
     DOMAIN,
@@ -50,24 +49,23 @@ class EnergyFlowManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    def __init__(self) -> None:
-        """Initialize the config flow."""
-        self.init_data: dict[str, Any] = {}
-
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
-        """Handle the initial step - Input sensors."""
+        """Handle the initial step."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            # Store the input sensors data
-            self.init_data = user_input
-            return await self.async_step_water_heater()
+            # Create the config entry
+            return self.async_create_entry(
+                title="Energy Flow Manager",
+                data=user_input,
+            )
 
-        # Schema for input sensors
+        # Single-step schema with all configuration
         data_schema = vol.Schema(
             {
+                # Input sensors
                 vol.Required(CONF_SOLAR_SURPLUS_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
@@ -80,90 +78,27 @@ class EnergyFlowManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_WATER_TEMP_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
-            }
-        )
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=data_schema,
-            errors=errors,
-            description_placeholders={
-                "name": "Energy Flow Manager",
-            },
-        )
-
-    async def async_step_water_heater(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
-        """Configure water heater settings."""
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            # Merge with previous data
-            self.init_data.update(user_input)
-            return await self.async_step_car_charger()
-
-        # Schema for water heater
-        data_schema = vol.Schema(
-            {
+                # Water heater
                 vol.Optional(CONF_WATER_HEATER_SWITCH): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="switch")
                 ),
                 vol.Optional(
                     CONF_WATER_HEATER_MIN_SURPLUS,
                     default=DEFAULT_WATER_HEATER_MIN_SURPLUS,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=10000, step=100, unit_of_measurement="W"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
                 vol.Optional(
                     CONF_WATER_HEATER_MIN_TEMP,
                     default=DEFAULT_WATER_HEATER_MIN_TEMP,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=1, unit_of_measurement="°C"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_WATER_HEATER_MAX_TEMP,
                     default=DEFAULT_WATER_HEATER_MAX_TEMP,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=1, unit_of_measurement="°C"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_WATER_HEATER_POWER,
                     default=DEFAULT_WATER_HEATER_POWER,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=10000, step=100, unit_of_measurement="W"
-                    )
-                ),
-            }
-        )
-
-        return self.async_show_form(
-            step_id="water_heater",
-            data_schema=data_schema,
-            errors=errors,
-        )
-
-    async def async_step_car_charger(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
-        """Configure car charger settings."""
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            # Merge with previous data
-            self.init_data.update(user_input)
-            return await self.async_step_battery()
-
-        # Schema for car charger
-        data_schema = vol.Schema(
-            {
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
+                # Car charger
                 vol.Optional(CONF_CAR_CHARGER_SWITCH): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="switch")
                 ),
@@ -173,84 +108,33 @@ class EnergyFlowManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_SURPLUS,
                     default=DEFAULT_CAR_CHARGER_MIN_SURPLUS,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=10000, step=100, unit_of_measurement="W"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_RATE,
                     default=DEFAULT_CAR_CHARGER_MIN_RATE,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=6, max=32, step=1, unit_of_measurement="A"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=6, max=32)),
                 vol.Optional(
                     CONF_CAR_CHARGER_MAX_RATE,
                     default=DEFAULT_CAR_CHARGER_MAX_RATE,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=6, max=32, step=1, unit_of_measurement="A"
-                    )
-                ),
-            }
-        )
-
-        return self.async_show_form(
-            step_id="car_charger",
-            data_schema=data_schema,
-            errors=errors,
-        )
-
-    async def async_step_battery(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
-        """Configure battery and general settings."""
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            # Merge with previous data
-            self.init_data.update(user_input)
-            
-            # Create the config entry
-            return self.async_create_entry(
-                title="Energy Flow Manager",
-                data=self.init_data,
-            )
-
-        # Schema for battery and general settings
-        data_schema = vol.Schema(
-            {
+                ): vol.All(vol.Coerce(int), vol.Range(min=6, max=32)),
+                # Battery and general
                 vol.Optional(
                     CONF_BATTERY_MIN_SOC,
                     default=DEFAULT_BATTERY_MIN_SOC,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=5, unit_of_measurement="%"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_BATTERY_MAX_SOC,
                     default=DEFAULT_BATTERY_MAX_SOC,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=5, unit_of_measurement="%"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_UPDATE_INTERVAL,
                     default=DEFAULT_UPDATE_INTERVAL,
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=10, max=300, step=10, unit_of_measurement="s"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=10, max=300)),
             }
         )
 
         return self.async_show_form(
-            step_id="battery",
+            step_id="user",
             data_schema=data_schema,
             errors=errors,
         )
@@ -291,67 +175,35 @@ class EnergyFlowManagerOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_WATER_HEATER_MIN_SURPLUS,
                     default=current_data.get(CONF_WATER_HEATER_MIN_SURPLUS, DEFAULT_WATER_HEATER_MIN_SURPLUS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=10000, step=100, unit_of_measurement="W"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
                 vol.Optional(
                     CONF_WATER_HEATER_MIN_TEMP,
                     default=current_data.get(CONF_WATER_HEATER_MIN_TEMP, DEFAULT_WATER_HEATER_MIN_TEMP),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=1, unit_of_measurement="°C"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_WATER_HEATER_MAX_TEMP,
                     default=current_data.get(CONF_WATER_HEATER_MAX_TEMP, DEFAULT_WATER_HEATER_MAX_TEMP),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=1, unit_of_measurement="°C"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_SURPLUS,
                     default=current_data.get(CONF_CAR_CHARGER_MIN_SURPLUS, DEFAULT_CAR_CHARGER_MIN_SURPLUS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=10000, step=100, unit_of_measurement="W"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=10000)),
                 vol.Optional(
                     CONF_CAR_CHARGER_MIN_RATE,
                     default=current_data.get(CONF_CAR_CHARGER_MIN_RATE, DEFAULT_CAR_CHARGER_MIN_RATE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=6, max=32, step=1, unit_of_measurement="A"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=6, max=32)),
                 vol.Optional(
                     CONF_CAR_CHARGER_MAX_RATE,
                     default=current_data.get(CONF_CAR_CHARGER_MAX_RATE, DEFAULT_CAR_CHARGER_MAX_RATE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=6, max=32, step=1, unit_of_measurement="A"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=6, max=32)),
                 vol.Optional(
                     CONF_BATTERY_MIN_SOC,
                     default=current_data.get(CONF_BATTERY_MIN_SOC, DEFAULT_BATTERY_MIN_SOC),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0, max=100, step=5, unit_of_measurement="%"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
                     CONF_UPDATE_INTERVAL,
                     default=current_data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=10, max=300, step=10, unit_of_measurement="s"
-                    )
-                ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=10, max=300)),
             }
         )
 
