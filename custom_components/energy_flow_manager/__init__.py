@@ -10,6 +10,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.components import panel_custom
+from homeassistant.util import file as file_util
 
 from .const import (
     DOMAIN,
@@ -90,9 +91,10 @@ async def async_register_panel(hass: HomeAssistant) -> None:
     # Get the path to the panel HTML file
     panel_path = os.path.join(os.path.dirname(__file__), "panel.html")
     
-    # Read the panel HTML content
-    with open(panel_path, "r", encoding="utf-8") as file:
-        panel_html = file.read()
+    # Read the panel HTML content asynchronously
+    panel_html = await hass.async_add_executor_job(
+        file_util.read_file, panel_path
+    )
     
     # Register the panel using panel_custom component
     await panel_custom.async_register_panel(
