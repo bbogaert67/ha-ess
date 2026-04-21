@@ -1,0 +1,11 @@
+{
+  "domain": "energy_flow_manager",
+  "name": "Energy Flow Manager",
+  "codeowners": ["@homeassistant"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/homeassistant/energy_flow_manager",
+  "iot_class": "calculated",
+  "requirements": [],
+  "version": "1.0.0"
+}

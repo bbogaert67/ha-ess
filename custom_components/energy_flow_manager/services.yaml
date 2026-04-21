@@ -1,0 +1,6 @@
+force_update:
+  name: Force Update
+  description: Force an immediate update of energy flow calculations and device control.
+  fields: {}
+
+# Made with Bob

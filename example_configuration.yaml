@@ -1,0 +1,217 @@
+# Example Configuration for Energy Flow Manager
+# This file shows example entity configurations that work with the Energy Flow Manager integration
+
+# Example Solar Surplus Sensor
+# This should be a sensor that reports the surplus solar power available
+# Positive values = surplus (exporting to grid or available for use)
+# Negative values = importing from grid
+sensor:
+  - platform: template
+    sensors:
+      solar_surplus:
+        friendly_name: "Solar Surplus Power"
+        unit_of_measurement: "W"
+        device_class: power
+        value_template: >
+          {% set solar_production = states('sensor.solar_power') | float(0) %}
+          {% set house_consumption = states('sensor.house_power') | float(0) %}
+          {% set battery_power = states('sensor.battery_power') | float(0) %}
+          {{ (solar_production - house_consumption - battery_power) | round(0) }}
+
+# Example Battery State of Charge Sensor
+# Should report battery SOC as a percentage (0-100)
+# sensor.battery_soc (already exists in most battery systems)
+
+# Example Battery Power Sensor
+# Should report battery power flow in Watts
+# Positive = charging, Negative = discharging
+# sensor.battery_power (already exists in most battery systems)
+
+# Example Water Temperature Sensor
+# Should report water temperature in Celsius
+# sensor.water_heater_temperature (from your water heater system)
+
+# Example Water Heater Switch
+# This should be a switch entity that controls your water heater
+switch:
+  - platform: template
+    switches:
+      water_heater:
+        friendly_name: "Water Heater"
+        value_template: "{{ is_state('switch.water_heater_relay', 'on') }}"
+        turn_on:
+          service: switch.turn_on
+          target:
+            entity_id: switch.water_heater_relay
+        turn_off:
+          service: switch.turn_off
+          target:
+            entity_id: switch.water_heater_relay
+
+# Example Car Charger Switch
+# This should be a switch entity that controls your EV charger
+# Many EV chargers have built-in switches (e.g., Wallbox, Easee, etc.)
+# switch.car_charger (from your EV charger integration)
+
+# Example Car Charger Rate Control
+# This should be a number entity that sets the charge rate in Amperes
+# Many EV chargers support this (e.g., Wallbox, Easee, etc.)
+# number.car_charger_max_current (from your EV charger integration)
+
+# ============================================
+# ENERGY FLOW MANAGER CONFIGURATION EXAMPLE
+# ============================================
+# After installing the integration, configure it through the UI:
+# Settings -> Devices & Services -> Add Integration -> Energy Flow Manager
+
+# Configuration values you'll need to provide:
+# 
+# Input Sensors:
+#   - Solar Surplus Sensor: sensor.solar_surplus
+#   - Battery SOC Sensor: sensor.battery_soc
+#   - Battery Power Sensor: sensor.battery_power
+#   - Water Temperature Sensor: sensor.water_heater_temperature
+#
+# Water Heater Settings:
+#   - Water Heater Switch: switch.water_heater
+#   - Minimum Surplus: 2000 W
+#   - Minimum Temperature: 40 °C
+#   - Maximum Temperature: 60 °C
+#   - Heater Power: 2000 W
+#
+# Car Charger Settings:
+#   - Car Charger Switch: switch.car_charger
+#   - Charge Rate Entity: number.car_charger_max_current
+#   - Minimum Surplus: 1400 W (6A × 230V)
+#   - Minimum Rate: 6 A
+#   - Maximum Rate: 16 A
+#
+# Battery & General:
+#   - Minimum Battery SOC: 20 %
+#   - Maximum Battery SOC: 90 %
+#   - Update Interval: 30 seconds
+
+# ============================================
+# EXAMPLE AUTOMATIONS
+# ============================================
+
+automation:
+  # Send notification when water heater starts
+  - alias: "Water Heater Started Notification"
+    trigger:
+      - platform: state
+        entity_id: sensor.energy_flow_manager_water_heater_status
+        to: "Active"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Water Heater Active"
+          message: "Water heater started using {{ states('sensor.energy_flow_manager_solar_surplus') }}W of solar surplus"
+
+  # Send notification when car charging starts
+  - alias: "Car Charging Started Notification"
+    trigger:
+      - platform: state
+        entity_id: sensor.energy_flow_manager_car_charger_status
+        to: "Active"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Car Charging Active"
+          message: "Car charging started at {{ states('sensor.energy_flow_manager_car_charger_rate') }}A using solar surplus"
+
+  # Alert when battery is low and devices are active
+  - alias: "Low Battery Alert"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.battery_soc
+        below: 25
+    condition:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: sensor.energy_flow_manager_water_heater_status
+            state: "Active"
+          - condition: state
+            entity_id: sensor.energy_flow_manager_car_charger_status
+            state: "Active"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Low Battery Warning"
+          message: "Battery SOC is {{ states('sensor.battery_soc') }}% but devices are still active"
+
+  # Force update at specific times
+  - alias: "Force Energy Flow Update"
+    trigger:
+      - platform: time_pattern
+        minutes: "/5"  # Every 5 minutes
+    action:
+      - service: energy_flow_manager.force_update
+
+# ============================================
+# EXAMPLE LOVELACE DASHBOARD CARDS
+# ============================================
+
+# Energy Flow Overview Card
+# type: vertical-stack
+# cards:
+#   - type: markdown
+#     content: |
+#       ## Energy Flow Manager
+#       Intelligent control of water heater and car charger based on solar surplus
+#   
+#   - type: entities
+#     title: Energy Status
+#     entities:
+#       - entity: sensor.energy_flow_manager_solar_surplus
+#         name: Solar Surplus
+#       - entity: sensor.energy_flow_manager_battery_soc
+#         name: Battery SOC
+#       - entity: sensor.energy_flow_manager_available_surplus
+#         name: Available Surplus
+#   
+#   - type: entities
+#     title: Water Heater
+#     entities:
+#       - entity: sensor.energy_flow_manager_water_heater_status
+#         name: Status
+#       - entity: sensor.energy_flow_manager_water_temperature
+#         name: Temperature
+#   
+#   - type: entities
+#     title: Car Charger
+#     entities:
+#       - entity: sensor.energy_flow_manager_car_charger_status
+#         name: Status
+#       - entity: sensor.energy_flow_manager_car_charger_rate
+#         name: Charge Rate
+#   
+#   - type: button
+#     name: Force Update
+#     tap_action:
+#       action: call-service
+#       service: energy_flow_manager.force_update
+
+# Gauge Card for Solar Surplus
+# type: gauge
+# entity: sensor.energy_flow_manager_solar_surplus
+# name: Solar Surplus
+# min: 0
+# max: 5000
+# severity:
+#   green: 2000
+#   yellow: 1000
+#   red: 0
+
+# History Graph
+# type: history-graph
+# title: Energy Flow History
+# entities:
+#   - entity: sensor.energy_flow_manager_solar_surplus
+#   - entity: sensor.energy_flow_manager_battery_soc
+#   - entity: sensor.energy_flow_manager_water_heater_status
+#   - entity: sensor.energy_flow_manager_car_charger_status
+# hours_to_show: 24
+
+# Made with Bob
