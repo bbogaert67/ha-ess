@@ -76,20 +76,39 @@
             color: var(--secondary-text-color, #727272);
             margin-top: 10px;
         }
+        .error {
+            color: #f44336;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>⚡ Energy Flow Manager</h1>
         
+        <div id="error-message" class="error" style="display: none;"></div>
+        
         <div class="card">
             <h2>Energy Monitoring</h2>
-            <div class="sensor-grid" id="monitoring-sensors"></div>
+            <div class="sensor-grid" id="monitoring-sensors">
+                <div class="sensor">
+                    <div class="sensor-name">Loading...</div>
+                    <div class="sensor-value">Please wait</div>
+                </div>
+            </div>
         </div>
         
         <div class="card">
             <h2>Device Status</h2>
-            <div class="sensor-grid" id="status-sensors"></div>
+            <div class="sensor-grid" id="status-sensors">
+                <div class="sensor">
+                    <div class="sensor-name">Loading...</div>
+                    <div class="sensor-value">Please wait</div>
+                </div>
+            </div>
         </div>
         
         <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
@@ -97,22 +116,76 @@
     </div>
 
     <script>
+        // Get authentication token from parent window or local storage
+        function getAuthToken() {
+            try {
+                // Try to get from parent window (if in iframe)
+                if (window.parent && window.parent !== window) {
+                    const token = window.parent.localStorage.getItem('hassTokens');
+                    if (token) {
+                        const tokens = JSON.parse(token);
+                        return tokens.access_token;
+                    }
+                }
+                // Try local storage
+                const token = localStorage.getItem('hassTokens');
+                if (token) {
+                    const tokens = JSON.parse(token);
+                    return tokens.access_token;
+                }
+            } catch (e) {
+                console.error('Error getting auth token:', e);
+            }
+            return null;
+        }
+
         async function fetchSensors() {
             try {
-                const response = await fetch('/api/states');
+                const token = getAuthToken();
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await fetch('/api/states', { headers });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const states = await response.json();
-                return states.filter(state => state.entity_id.startsWith('sensor.energy_flow_manager_'));
+                const sensors = states.filter(state => 
+                    state.entity_id.startsWith('sensor.energy_flow_manager_')
+                );
+                
+                if (sensors.length === 0) {
+                    showError('No Energy Flow Manager sensors found. Please ensure the integration is configured.');
+                }
+                
+                return sensors;
             } catch (error) {
                 console.error('Error fetching sensors:', error);
+                showError(`Error fetching data: ${error.message}`);
                 return [];
             }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.style.display = 'none';
         }
 
         function formatValue(value, unit) {
             if (value === null || value === undefined || value === 'unknown' || value === 'unavailable') {
                 return '<span style="color: #f44336;">N/A</span>';
             }
-            if (unit === 'on' || unit === 'off') {
+            if (unit === 'on' || unit === 'off' || value === 'on' || value === 'off') {
                 const statusClass = value === 'on' ? 'status-on' : 'status-off';
                 return `<span class="${statusClass}">${value.toUpperCase()}</span>`;
             }
@@ -138,15 +211,24 @@
                     return unit;
                 }
             }
-            return '';
+            return entity.attributes.unit_of_measurement || '';
         }
 
         function getFriendlyName(entity) {
-            return entity.attributes.friendly_name || entity.entity_id.replace('sensor.energy_flow_manager_', '').replace(/_/g, ' ');
+            return entity.attributes.friendly_name || 
+                   entity.entity_id.replace('sensor.energy_flow_manager_', '')
+                                   .replace(/_/g, ' ')
+                                   .replace(/\b\w/g, l => l.toUpperCase());
         }
 
         async function updateDisplay() {
+            hideError();
             const sensors = await fetchSensors();
+            
+            if (sensors.length === 0) {
+                return;
+            }
+            
             const monitoringSensors = sensors.filter(s => 
                 !s.entity_id.includes('status')
             );
@@ -157,24 +239,32 @@
             const monitoringDiv = document.getElementById('monitoring-sensors');
             const statusDiv = document.getElementById('status-sensors');
 
-            monitoringDiv.innerHTML = monitoringSensors.map(sensor => `
-                <div class="sensor">
-                    <div class="sensor-name">${getFriendlyName(sensor)}</div>
-                    <div class="sensor-value">
-                        ${formatValue(sensor.state, getUnit(sensor))}
-                        <span class="sensor-unit">${getUnit(sensor)}</span>
+            if (monitoringSensors.length > 0) {
+                monitoringDiv.innerHTML = monitoringSensors.map(sensor => `
+                    <div class="sensor">
+                        <div class="sensor-name">${getFriendlyName(sensor)}</div>
+                        <div class="sensor-value">
+                            ${formatValue(sensor.state, getUnit(sensor))}
+                            <span class="sensor-unit">${getUnit(sensor)}</span>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                monitoringDiv.innerHTML = '<div class="sensor"><div class="sensor-name">No monitoring sensors found</div></div>';
+            }
 
-            statusDiv.innerHTML = statusSensors.map(sensor => `
-                <div class="sensor">
-                    <div class="sensor-name">${getFriendlyName(sensor)}</div>
-                    <div class="sensor-value">
-                        ${formatValue(sensor.state, sensor.state)}
+            if (statusSensors.length > 0) {
+                statusDiv.innerHTML = statusSensors.map(sensor => `
+                    <div class="sensor">
+                        <div class="sensor-name">${getFriendlyName(sensor)}</div>
+                        <div class="sensor-value">
+                            ${formatValue(sensor.state, sensor.state)}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                statusDiv.innerHTML = '<div class="sensor"><div class="sensor-name">No status sensors found</div></div>';
+            }
 
             document.getElementById('last-update').textContent = 
                 `Last updated: ${new Date().toLocaleTimeString()}`;
@@ -185,7 +275,7 @@
         }
 
         // Initial load
-        updateDisplay();
+        setTimeout(updateDisplay, 500);
 
         // Auto-refresh every 30 seconds
         setInterval(updateDisplay, 30000);
