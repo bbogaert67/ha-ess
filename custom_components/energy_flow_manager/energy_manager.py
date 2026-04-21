@@ -96,8 +96,8 @@ class EnergyFlowManager:
             "battery_soc": battery_soc,
             "battery_power": battery_power,
             "water_temp": water_temp,
-            "water_heater_active": False,
-            "car_charger_active": False,
+            "water_heater_status": False,
+            "car_charger_status": False,
             "car_charger_rate": 0,
             "available_surplus": solar_surplus or 0,
         }
@@ -160,7 +160,7 @@ class EnergyFlowManager:
             )
             _LOGGER.info("Turned off water heater (surplus: %s W, temp: %s°C)", solar_surplus, water_temp)
 
-        self._data["water_heater_active"] = should_heat
+        self._data["water_heater_status"] = should_heat
 
     async def _control_car_charger(
         self,
@@ -230,7 +230,7 @@ class EnergyFlowManager:
         if should_charge and rate_entity and charge_rate > 0:
             await self._set_charge_rate(rate_entity, charge_rate)
 
-        self._data["car_charger_active"] = should_charge
+        self._data["car_charger_status"] = should_charge
         self._data["car_charger_rate"] = charge_rate if should_charge else 0
 
     async def _set_charge_rate(self, rate_entity: str, rate: float) -> None:
