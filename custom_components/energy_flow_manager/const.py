@@ -1,7 +1,7 @@
 """Constants for the Energy Flow Manager integration."""
 
 DOMAIN = "energy_flow_manager"
-VERSION = "1.0.11"
+VERSION = "1.0.12"
 
 # Configuration keys
 CONF_SOLAR_SURPLUS_SENSOR = "solar_surplus_sensor"
