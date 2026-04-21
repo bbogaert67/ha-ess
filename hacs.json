@@ -1,0 +1,7 @@
+{
+  "name": "Energy Flow Manager",
+  "content_in_root": false,
+  "filename": "energy_flow_manager",
+  "render_readme": true,
+  "homeassistant": "2023.1.0"
+}
